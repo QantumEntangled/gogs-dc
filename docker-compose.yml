@@ -1,0 +1,44 @@
+version: '3'
+services:
+
+    app:
+        image: "gogs/gogs:latest"
+        restart: unless-stopped
+        depends_on:
+            - db
+        networks:
+            - net
+        ports:
+            - "4000:3000"
+            - "4022:22"
+        volumes:
+            - "gogs-data:/data"
+        environment:
+            - "RUN_CROND=true"
+
+    db:
+        image: "postgres:latest"
+        restart: unless-stopped
+        networks:
+            net:
+                aliases:
+                    - postgres
+        volumes:
+            - "db-data:/var/lib/postgresql/data"
+        environment:
+            - "POSTGRES_USER=gogs"
+            - "POSTGRES_DB=gogs"
+            - POSTGRES_PASSWORD
+        secrets:
+            - POSTGRES_PASSWORD
+
+networks:
+    net:
+
+volumes:
+    gogs-data:
+    db-data:
+
+secrets:
+    POSTGRES_PASSWORD:
+        file: ./secret-postgres-password.txt
